@@ -42,7 +42,7 @@ public class ExpenseService : IExpenseService
     {
         var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
 
-        if (expense == null)
+        if (expense is null)
         {
             return null;
         }
