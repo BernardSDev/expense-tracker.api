@@ -5,15 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace expense_tracker.api.Services;
 
-public class ExpenseService : IExpenseService
+public class ExpenseService(AppDbContext context) : IExpenseService
 {
-    private readonly AppDbContext _context;
-
-    public ExpenseService(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<ExpenseResponseDto> CreateAsync(CreateExpenseDto dto)
     {
         var expense = new Expense
@@ -24,9 +17,9 @@ public class ExpenseService : IExpenseService
             UserId = dto.UserId,
         };
 
-        _context.Expenses.Add(expense);
+        context.Expenses.Add(expense);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return new ExpenseResponseDto()
         {
@@ -40,7 +33,7 @@ public class ExpenseService : IExpenseService
     
     public async Task<ExpenseResponseDto?> GetByIdAsync(int id)
     {
-        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
+        var expense = await context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
 
         if (expense is null)
         {
