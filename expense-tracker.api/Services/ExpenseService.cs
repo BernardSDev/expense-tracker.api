@@ -33,7 +33,7 @@ public class ExpenseService(AppDbContext context) : IExpenseService
     
     public async Task<ExpenseResponseDto?> GetByIdAsync(int id)
     {
-        var expense = await context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
+        var expense = await context.Expenses.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
 
         if (expense is null)
         {
