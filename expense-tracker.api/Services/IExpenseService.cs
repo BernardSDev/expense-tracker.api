@@ -6,4 +6,5 @@ public interface IExpenseService
 {
     Task<ExpenseResponseDto> CreateAsync(CreateExpenseDto dto);
     Task<ExpenseResponseDto?> GetByIdAsync(int id);
+    Task<UserExpensesResponseDto?> GetExpensesByUserAsync(int userId);
 }

@@ -49,4 +49,32 @@ public class ExpenseService(AppDbContext context) : IExpenseService
             UserId = expense.UserId
         };
     }
+    
+    public async Task<UserExpensesResponseDto?> GetExpensesByUserAsync(int userId)
+    {
+        bool userExists = await context.Users.AnyAsync(u => u.Id == userId);
+
+        if (!userExists)
+        {
+            return null;
+        }
+
+        var expenses = await context.Expenses
+            .Where(e => e.UserId == userId)
+            .Select(e => new ExpenseResponseDto
+            {
+                Id = e.Id,
+                Amount = e.Amount,
+                Description = e.Description,
+                Date = e.Date,
+                UserId = e.UserId
+            })
+            .ToListAsync();
+
+        return new UserExpensesResponseDto
+        {
+            UserId = userId,
+            Expenses = expenses
+        };
+    }
 }
