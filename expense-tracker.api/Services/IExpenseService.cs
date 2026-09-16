@@ -9,4 +9,6 @@ public interface IExpenseService
     Task<UserExpensesResponseDto?> GetExpensesByUserAsync(int userId);
     
     Task<ExpenseResponseDto?> UpdateAsync(int id, UpdateExpenseDto dto);
+    
+    Task<bool> DeleteAsync(int id);
 }

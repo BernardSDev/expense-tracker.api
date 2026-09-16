@@ -102,4 +102,19 @@ public class ExpenseService(AppDbContext context) : IExpenseService
             UserId = expense.UserId
         };
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var expense = await context.Expenses.FindAsync(id);
+        
+        if (expense is null)
+        {
+            return false;
+        }
+        
+        context.Expenses.Remove(expense);
+        await context.SaveChangesAsync();
+        
+        return true;
+    }
 }
