@@ -77,4 +77,29 @@ public class ExpenseService(AppDbContext context) : IExpenseService
             Expenses = expenses
         };
     }
+
+    public async Task<ExpenseResponseDto?> UpdateAsync(int id, UpdateExpenseDto dto)
+    {
+        var expense = await context.Expenses.FindAsync(id);
+        
+        if (expense is null)
+        {
+            return null;
+        }
+
+        expense.Amount = dto.Amount;
+        expense.Description = dto.Description;
+        expense.Date = dto.Date;
+        
+        await context.SaveChangesAsync();
+
+        return new ExpenseResponseDto
+        {
+            Id = expense.Id,
+            Amount = expense.Amount,
+            Description = expense.Description,
+            Date = expense.Date,
+            UserId = expense.UserId
+        };
+    }
 }

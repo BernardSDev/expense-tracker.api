@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace expense_tracker.api.DTOs;
 
-public class CreateExpenseDto
+public class UpdateExpenseDto
 {
     [Range(0.01, double.MaxValue)]
     public decimal Amount { get; set; }
@@ -13,6 +13,4 @@ public class CreateExpenseDto
     
     [Required]
     public DateTimeOffset Date { get; set; }
-    
-    public int UserId { get; set; }
 }

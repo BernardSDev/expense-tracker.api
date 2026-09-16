@@ -28,4 +28,17 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         
         return Ok(expense);
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateExpenseDto dto)
+    {
+        var result = await expenseService.UpdateAsync(id, dto);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+        
+        return Ok(result);
+    }
 }

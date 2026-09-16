@@ -47,7 +47,7 @@ namespace expense_tracker.api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("Expenses", (string)null);
                 });
 
             modelBuilder.Entity("expense_tracker.api.Models.User", b =>
@@ -64,7 +64,7 @@ namespace expense_tracker.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("expense_tracker.api.Models.Expense", b =>
