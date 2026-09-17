@@ -6,5 +6,5 @@ public class ExpenseResponseDto
     public decimal Amount { get; set; }
     public string Description { get; set; } = string.Empty;
     public DateTimeOffset Date { get; set; }
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 }

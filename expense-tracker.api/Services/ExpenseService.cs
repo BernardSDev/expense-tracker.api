@@ -50,7 +50,7 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         };
     }
     
-    public async Task<UserExpensesResponseDto?> GetExpensesByUserAsync(int userId)
+    public async Task<UserExpensesResponseDto?> GetExpensesByUserAsync(Guid userId)
     {
         bool userExists = await context.Users.AnyAsync(u => u.Id == userId);
 

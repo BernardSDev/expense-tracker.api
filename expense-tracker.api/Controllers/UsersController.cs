@@ -10,7 +10,7 @@ public class UsersController(IExpenseService expenseService) : ControllerBase
 {
     [HttpGet("{userId}/Expenses")]
     
-    public async Task<IActionResult> GetExpensesByUserAsync(int userId)
+    public async Task<IActionResult> GetExpensesByUserAsync(Guid userId)
     {
         var result = await expenseService.GetExpensesByUserAsync(userId);
         

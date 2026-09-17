@@ -14,5 +14,5 @@ public class CreateExpenseDto
     [Required]
     public DateTimeOffset Date { get; set; }
     
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 }
