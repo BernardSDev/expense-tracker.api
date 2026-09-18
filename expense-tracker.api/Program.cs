@@ -1,5 +1,8 @@
 using expense_tracker.api.Data;
+using expense_tracker.api.Models;
+using expense_tracker.api.Security;
 using expense_tracker.api.Services;
+using expense_tracker.api.Services.Auth;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +16,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<Microsoft.AspNetCore.Identity.PasswordHasher<User>>();
 
 var app = builder.Build();
 

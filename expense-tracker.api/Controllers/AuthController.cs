@@ -1,0 +1,19 @@
+using expense_tracker.api.DTOs;
+using expense_tracker.api.Services.Auth;
+using Microsoft.AspNetCore.Mvc;
+
+namespace expense_tracker.api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController(IAuthService authService) : ControllerBase
+{
+    [HttpPost("register")]
+    
+    public async Task<ActionResult<RegistrationResponseDto>> Register(RegistrationDto dto)
+    {
+        var result = await authService.RegisterAsync(dto);
+        
+        return StatusCode(StatusCodes.Status201Created, result);
+    }
+}
