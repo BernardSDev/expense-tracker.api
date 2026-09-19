@@ -20,7 +20,6 @@ public class JwtTokenService(IConfiguration configuration) : IJwtTokenService
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Iss, issuer!),
         };
         
         var expirationMinutes = configuration.GetValue<int>("Jwt:ExpirationMinutes");
@@ -31,7 +30,7 @@ public class JwtTokenService(IConfiguration configuration) : IJwtTokenService
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
             signingCredentials: credentials
-            );
+        );
         
         var tokenHandler = new JwtSecurityTokenHandler();
         
