@@ -7,14 +7,14 @@ namespace expense_tracker.api.Services;
 
 public class ExpenseService(AppDbContext context) : IExpenseService
 {
-    public async Task<ExpenseResponseDto> CreateAsync(CreateExpenseDto dto)
+    public async Task<ExpenseResponseDto> CreateAsync(CreateExpenseDto dto, Guid userId)
     {
         var expense = new Expense
         {
             Amount = dto.Amount,
             Description = dto.Description,
             Date = dto.Date,
-            UserId = dto.UserId,
+            UserId = userId
         };
 
         context.Expenses.Add(expense);
@@ -31,9 +31,9 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         };
     }
     
-    public async Task<ExpenseResponseDto?> GetByIdAsync(int id)
+    public async Task<ExpenseResponseDto?> GetByIdAsync(int id, Guid userId)
     {
-        var expense = await context.Expenses.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+        var expense = await context.Expenses.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
 
         if (expense is null)
         {
@@ -78,9 +78,9 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         };
     }
 
-    public async Task<ExpenseResponseDto?> UpdateAsync(int id, UpdateExpenseDto dto)
+    public async Task<ExpenseResponseDto?> UpdateAsync(int id, UpdateExpenseDto dto, Guid userId)
     {
-        var expense = await context.Expenses.FindAsync(id);
+        var expense = await context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
         
         if (expense is null)
         {
@@ -103,9 +103,9 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         };
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id,  Guid userId)
     {
-        var expense = await context.Expenses.FindAsync(id);
+        var expense = await context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
         
         if (expense is null)
         {
@@ -113,6 +113,7 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         }
         
         context.Expenses.Remove(expense);
+        
         await context.SaveChangesAsync();
         
         return true;
