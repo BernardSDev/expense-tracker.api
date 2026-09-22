@@ -9,7 +9,10 @@ namespace expense_tracker.api.Services.Auth;
 public class AuthService(
     AppDbContext context, 
     IPasswordHasher passwordHasher, 
-    IJwtTokenService jwtTokenService
+    IJwtTokenService jwtTokenService,
+    IRefreshTokenGenerator refreshTokenGenerator,
+    IRefreshTokenHasher refreshTokenHasher,
+    IConfiguration configuration
     ) : IAuthService
 {
     public async Task<RegistrationResponseDto> RegisterAsync(RegistrationDto dto)
@@ -75,10 +78,30 @@ public class AuthService(
         }
 
         var accessToken = jwtTokenService.CreateAccessToken(user);
+        
+        var refreshToken = refreshTokenGenerator.GenerateRefreshToken();
+        
+        var tokenHash = refreshTokenHasher.Hash(refreshToken);
+
+        var now = DateTimeOffset.UtcNow;
+
+        var refreshTokenEntity = new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = tokenHash,
+            CreatedAt = now,
+            ExpiresAt = now.AddDays(configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays")),
+            RevokedAt = null
+        };
+        
+        context.RefreshTokens.Add(refreshTokenEntity);
+        
+        await context.SaveChangesAsync();
 
         return new LoginResponseDto
         {
             AccessToken = accessToken,
+            RefreshToken = refreshToken
         };
     }
 }

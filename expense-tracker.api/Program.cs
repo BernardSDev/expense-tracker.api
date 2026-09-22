@@ -53,6 +53,8 @@ builder.Services.AddScoped<Microsoft.AspNetCore.Identity.PasswordHasher<User>>()
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+builder.Services.AddScoped<IRefreshTokenHasher, RefreshTokenHasher>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
