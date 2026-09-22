@@ -104,4 +104,41 @@ public class AuthService(
             RefreshToken = refreshToken
         };
     }
+
+    public async Task<LoginResponseDto> RefreshAsync(string refreshToken)
+    {
+        var tokenHash = refreshTokenHasher.Hash(refreshToken);
+        
+        var storedToken = await context.RefreshTokens.FirstOrDefaultAsync(token => token.TokenHash == tokenHash);
+
+        if (storedToken is null)
+        {
+            throw new InvalidOperationException("Invalid refresh token.");
+        }
+
+        if (storedToken.ExpiresAt < DateTimeOffset.UtcNow)
+        {
+            throw new InvalidOperationException("Refresh token has expired.");
+        }
+
+        if (storedToken.RevokedAt is not null)
+        {
+            throw new InvalidOperationException("Refresh token has already been revoked.");
+        }
+        
+        var user = await context.Users.FirstOrDefaultAsync(user => user.Id == storedToken.UserId);
+
+        if (user is null)
+        {
+            throw new InvalidOperationException("User associated with refresh token was not found.");
+        }
+        
+        var accessToken = jwtTokenService.CreateAccessToken(user);
+
+        return new LoginResponseDto
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
+    }
 }
