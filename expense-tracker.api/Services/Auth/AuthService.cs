@@ -161,4 +161,20 @@ public class AuthService(
             RefreshToken = newRefreshToken
         };
     }
+    
+    public async Task LogoutAsync(string refreshToken)
+    {
+        var tokenHash = refreshTokenHasher.Hash(refreshToken);
+        
+        var storedToken = context.RefreshTokens.FirstOrDefault(token => token.TokenHash == tokenHash);
+
+        if (storedToken is null)
+        {
+            throw new InvalidOperationException("Invalid refresh token.");
+        }
+        
+        storedToken.RevokedAt = DateTimeOffset.UtcNow;
+        
+        await context.SaveChangesAsync();
+    }
 }
