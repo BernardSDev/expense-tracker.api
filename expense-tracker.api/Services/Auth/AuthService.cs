@@ -133,12 +133,32 @@ public class AuthService(
             throw new InvalidOperationException("User associated with refresh token was not found.");
         }
         
+        storedToken.RevokedAt = DateTimeOffset.UtcNow;
+        
+        var newRefreshToken = refreshTokenGenerator.GenerateRefreshToken();
+        var newTokenHash = refreshTokenHasher.Hash(newRefreshToken);
+        
+        var now = DateTimeOffset.UtcNow;
+
+        var newRefreshTokenEntity = new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = newTokenHash,
+            CreatedAt = now,
+            ExpiresAt = now.AddDays(configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays")),
+            RevokedAt = null
+        };
+        
+        context.RefreshTokens.Add(newRefreshTokenEntity);
+        
+        await context.SaveChangesAsync();
+        
         var accessToken = jwtTokenService.CreateAccessToken(user);
 
         return new LoginResponseDto
         {
             AccessToken = accessToken,
-            RefreshToken = refreshToken
+            RefreshToken = newRefreshToken
         };
     }
 }
