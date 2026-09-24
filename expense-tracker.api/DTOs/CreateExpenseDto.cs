@@ -4,7 +4,7 @@ namespace expense_tracker.api.DTOs;
 
 public class CreateExpenseDto
 {
-    [Range(0.01, double.MaxValue)]
+    [Range(0.01, 10_000_000)]
     public decimal Amount { get; set; }
     
     [Required]
@@ -12,5 +12,5 @@ public class CreateExpenseDto
     public string Description { get; set; } = string.Empty;
     
     [Required]
-    public DateTimeOffset Date { get; set; }
+    public DateTimeOffset? Date { get; set; }
 }

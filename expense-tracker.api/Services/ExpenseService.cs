@@ -13,7 +13,7 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         {
             Amount = dto.Amount,
             Description = dto.Description,
-            Date = dto.Date,
+            Date = dto.Date ?? throw new InvalidOperationException("Date is required."),
             UserId = userId
         };
 
@@ -89,7 +89,7 @@ public class ExpenseService(AppDbContext context) : IExpenseService
 
         expense.Amount = dto.Amount;
         expense.Description = dto.Description;
-        expense.Date = dto.Date;
+        expense.Date = dto.Date ?? throw new InvalidOperationException("Date is required.");
         
         await context.SaveChangesAsync();
 

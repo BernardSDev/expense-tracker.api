@@ -17,10 +17,10 @@ public class RegistrationDto
     public string Password { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(100, MinimumLength = 1)]
+    [StringLength(100)]
     public string FirstName { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(100, MinimumLength = 1)]
+    [StringLength(100)]
     public string LastName { get; set; } = string.Empty;
 }
