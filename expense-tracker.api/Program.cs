@@ -1,5 +1,6 @@
 using System.Text;
 using expense_tracker.api.Data;
+using expense_tracker.api.Middleware;
 using expense_tracker.api.Models;
 using expense_tracker.api.Security;
 using expense_tracker.api.Services;
@@ -82,6 +83,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

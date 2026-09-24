@@ -1,5 +1,6 @@
 using expense_tracker.api.Data;
 using expense_tracker.api.DTOs;
+using expense_tracker.api.Exceptions;
 using expense_tracker.api.Models;
 using expense_tracker.api.Security;
 using Microsoft.EntityFrameworkCore;
@@ -62,19 +63,19 @@ public class AuthService(
 
         if (user  is null)
         {
-            throw new InvalidOperationException("Invalid username or password.");
+            throw new UnauthorizedException("Invalid username or password.");
         }
 
         if (user.PasswordHash is null)
         {
-            throw new InvalidOperationException("Invalid username or password.");
+            throw new UnauthorizedException("Invalid username or password.");
         }
 
         var passwordIsValid = passwordHasher.VerifyPassword(dto.Password, user.PasswordHash);
 
         if (!passwordIsValid)
         {
-            throw new InvalidOperationException("Invalid username or password.");
+            throw new UnauthorizedException("Invalid username or password.");
         }
 
         var accessToken = jwtTokenService.CreateAccessToken(user);
@@ -113,24 +114,24 @@ public class AuthService(
 
         if (storedToken is null)
         {
-            throw new InvalidOperationException("Invalid refresh token.");
+            throw new UnauthorizedException("Invalid refresh token.");
         }
 
         if (storedToken.ExpiresAt < DateTimeOffset.UtcNow)
         {
-            throw new InvalidOperationException("Refresh token has expired.");
+            throw new UnauthorizedException("Refresh token has expired.");
         }
 
         if (storedToken.RevokedAt is not null)
         {
-            throw new InvalidOperationException("Refresh token has already been revoked.");
+            throw new UnauthorizedException("Refresh token has already been revoked.");
         }
         
         var user = await context.Users.FirstOrDefaultAsync(user => user.Id == storedToken.UserId);
 
         if (user is null)
         {
-            throw new InvalidOperationException("User associated with refresh token was not found.");
+            throw new UnauthorizedException("User associated with refresh token was not found.");
         }
         
         storedToken.RevokedAt = DateTimeOffset.UtcNow;
