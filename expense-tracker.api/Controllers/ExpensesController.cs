@@ -1,4 +1,5 @@
 using expense_tracker.api.DTOs;
+using expense_tracker.api.Extensions;
 using expense_tracker.api.Security;
 using expense_tracker.api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -34,12 +35,7 @@ public class ExpensesController(
 
         if (expense is null)
         {
-            return NotFound( new ErrorResponseDto
-            {
-                Status = StatusCodes.Status404NotFound,
-                Message = "Not Found",
-                Details = "Expense not found."
-            });
+            return this.NotFoundError("Expense not found");
         }
         
         return Ok(expense);
@@ -55,13 +51,7 @@ public class ExpensesController(
 
         if (result is null)
         {
-            return NotFound(
-                new ErrorResponseDto
-                {
-                    Status = StatusCodes.Status404NotFound,
-                    Message = "Not Found",
-                    Details = "Expense not found." 
-                });
+            return this.NotFoundError("Expense not found");
         }
         
         return Ok(result);
@@ -77,14 +67,7 @@ public class ExpensesController(
 
         if (!deleted)
         {
-            return NotFound(
-                
-                new ErrorResponseDto
-                {
-                    Status = StatusCodes.Status404NotFound,
-                    Message = "Not Found",
-                    Details = "Expense not found." 
-                });
+            return this.NotFoundError("Expense not found");
         }
         
         return NoContent();
