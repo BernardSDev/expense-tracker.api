@@ -1,3 +1,4 @@
+using expense_tracker.api.Constants;
 using expense_tracker.api.DTOs;
 using expense_tracker.api.Extensions;
 using expense_tracker.api.Security;
@@ -35,7 +36,7 @@ public class ExpensesController(
 
         if (expense is null)
         {
-            return this.NotFoundError("Expense not found");
+            return this.NotFoundError(ErrorMessages.ExpenseNotFound);
         }
         
         return Ok(expense);
@@ -51,7 +52,7 @@ public class ExpensesController(
 
         if (result is null)
         {
-            return this.NotFoundError("Expense not found");
+            return this.NotFoundError(ErrorMessages.ExpenseNotFound);
         }
         
         return Ok(result);
@@ -67,7 +68,7 @@ public class ExpensesController(
 
         if (!deleted)
         {
-            return this.NotFoundError("Expense not found");
+            return this.NotFoundError(ErrorMessages.ExpenseNotFound);
         }
         
         return NoContent();
