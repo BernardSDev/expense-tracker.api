@@ -1,3 +1,4 @@
+using expense_tracker.api.Constants;
 using expense_tracker.api.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,8 +11,8 @@ public static class ControllerExtensions
         return controller.NotFound(new ErrorResponseDto
         {
             Status = StatusCodes.Status404NotFound,
-            Message = "Not Found",
-            Details = "Expense not found." 
+            Message = ErrorMessages.NotFound,
+            Details = details 
         });
     }
 }
