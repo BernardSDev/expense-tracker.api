@@ -3,7 +3,9 @@ using expense_tracker.api.Exceptions;
 
 namespace expense_tracker.api.Middleware;
 
-public class GlobalExceptionHandlingMiddleware(RequestDelegate next)
+public class GlobalExceptionHandlingMiddleware(
+    RequestDelegate next, 
+    ILogger<GlobalExceptionHandlingMiddleware> logger)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -16,6 +18,11 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next)
             var status = exception is UnauthorizedException 
                 ? StatusCodes.Status401Unauthorized 
                 : StatusCodes.Status500InternalServerError;
+
+            if (status == StatusCodes.Status500InternalServerError)
+            {
+                logger.LogError(exception, "Unhandled exception occurred while processing the request.");
+            }
             
             var errorResponse = new ErrorResponseDto
             {

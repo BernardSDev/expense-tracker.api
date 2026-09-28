@@ -13,7 +13,8 @@ public class AuthService(
     IJwtTokenService jwtTokenService,
     IRefreshTokenGenerator refreshTokenGenerator,
     IRefreshTokenHasher refreshTokenHasher,
-    IConfiguration configuration
+    IConfiguration configuration, 
+    ILogger<AuthService> logger
     ) : IAuthService
 {
     public async Task<RegistrationResponseDto> RegisterAsync(RegistrationDto dto)
@@ -59,10 +60,14 @@ public class AuthService(
 
     public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
     {
+        logger.LogInformation("Login attempt for username {Username}", dto.Username);
+        
         var user = await context.Users.FirstOrDefaultAsync(user => user.Username == dto.Username);
-
-        if (user  is null)
+        
+        if (user is null)
         {
+            logger.LogWarning( "Login failed for username {Username}: user not found", dto.Username);
+           
             throw new UnauthorizedException("Invalid username or password.");
         }
 
@@ -75,8 +80,12 @@ public class AuthService(
 
         if (!passwordIsValid)
         {
+            logger.LogWarning("Login failed for username {Username}: invalid password", dto.Username);
+            
             throw new UnauthorizedException("Invalid username or password.");
         }
+        
+        logger.LogInformation("Login succeeded for username {Username}", dto.Username);
 
         var accessToken = jwtTokenService.CreateAccessToken(user);
         
