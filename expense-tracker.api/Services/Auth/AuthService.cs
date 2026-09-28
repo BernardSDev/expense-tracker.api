@@ -86,11 +86,9 @@ public class AuthService(
         }
         
         logger.LogInformation("Login succeeded for username {Username}", dto.Username);
-
-        var accessToken = jwtTokenService.CreateAccessToken(user);
         
         var refreshToken = refreshTokenGenerator.GenerateRefreshToken();
-        
+
         var tokenHash = refreshTokenHasher.Hash(refreshToken);
 
         var now = DateTimeOffset.UtcNow;
@@ -100,13 +98,20 @@ public class AuthService(
             UserId = user.Id,
             TokenHash = tokenHash,
             CreatedAt = now,
-            ExpiresAt = now.AddDays(configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays")),
+            ExpiresAt = now.AddDays(
+                configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays")
+            ),
             RevokedAt = null
         };
-        
+
         context.RefreshTokens.Add(refreshTokenEntity);
-        
+
         await context.SaveChangesAsync();
+
+        var accessToken = jwtTokenService.CreateAccessToken(
+            user,
+            refreshTokenEntity.Id
+        );
 
         return new LoginResponseDto
         {
@@ -163,7 +168,7 @@ public class AuthService(
         
         await context.SaveChangesAsync();
         
-        var accessToken = jwtTokenService.CreateAccessToken(user);
+        var accessToken = jwtTokenService.CreateAccessToken(user, newRefreshTokenEntity.Id);
 
         return new LoginResponseDto
         {

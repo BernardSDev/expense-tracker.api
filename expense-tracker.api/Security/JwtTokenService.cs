@@ -8,7 +8,7 @@ namespace expense_tracker.api.Security;
 
 public class JwtTokenService(IConfiguration configuration) : IJwtTokenService
 {
-    public string CreateAccessToken(User user)
+    public string CreateAccessToken(User user, int sessionId)
     {
         var issuer = configuration["Jwt:Issuer"];
         var audience = configuration["Jwt:Audience"];
@@ -20,6 +20,7 @@ public class JwtTokenService(IConfiguration configuration) : IJwtTokenService
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Sid, sessionId.ToString())
         };
         
         var expirationMinutes = configuration.GetValue<int>("Jwt:ExpirationMinutes");
