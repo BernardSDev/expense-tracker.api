@@ -1,3 +1,4 @@
+using expense_tracker.api.DTOs;
 using expense_tracker.api.Security;
 using expense_tracker.api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,8 @@ namespace expense_tracker.api.Controllers;
 
 public class UsersController(
     IExpenseService expenseService, 
-    ICurrentUserService currentUserService
+    ICurrentUserService currentUserService,
+    IUserService userService
 ) : ControllerBase
 {
     [HttpGet("Expenses")]
@@ -26,5 +28,21 @@ public class UsersController(
         }
 
         return Ok(result);
+    }
+    
+    [HttpGet("me")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var profile = await userService.GetProfileAsync();
+
+        return Ok(profile);
+    }
+    
+    [HttpPut("me")]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileDto dto)
+    {
+        var profile = await userService.UpdateProfileAsync(dto);
+
+        return Ok(profile);
     }
 }
