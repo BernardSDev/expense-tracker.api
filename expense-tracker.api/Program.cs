@@ -1,5 +1,6 @@
 using System.Text;
 using expense_tracker.api.Data;
+using expense_tracker.api.DTOs;
 using expense_tracker.api.Middleware;
 using expense_tracker.api.Models;
 using expense_tracker.api.Security;
@@ -7,6 +8,7 @@ using expense_tracker.api.Services;
 using expense_tracker.api.Services.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -41,7 +43,29 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddControllers();
+// builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(entry => entry.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    entry => entry.Key,
+                    entry => entry.Value!.Errors
+                        .Select(error => error.ErrorMessage)
+                        .ToArray());
+
+            return new BadRequestObjectResult(new ErrorResponseDto
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Message = "Validation failed.",
+                Errors = errors
+            });
+        };
+    });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
