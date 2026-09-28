@@ -40,8 +40,6 @@ public class AuthService(
             Username = dto.Username,
             Email = dto.Email,
             PasswordHash = passwordHash,
-            FirstName = dto.FirstName,
-            LastName = dto.LastName
         };
 
         context.Users.Add(user);
@@ -52,8 +50,6 @@ public class AuthService(
         {
             Id = user.Id,
             Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
             Username = user.Username
         };
     }
@@ -68,11 +64,6 @@ public class AuthService(
         {
             logger.LogWarning( "Login failed for username {Username}: user not found", dto.Username);
            
-            throw new UnauthorizedException("Invalid username or password.");
-        }
-
-        if (user.PasswordHash is null)
-        {
             throw new UnauthorizedException("Invalid username or password.");
         }
 
