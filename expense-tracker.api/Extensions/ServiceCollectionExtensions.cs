@@ -27,14 +27,16 @@ public static class ServiceCollectionExtensions
         
         return services;
     }
-
+    
     public static IServiceCollection AddDatabase(
-        this IServiceCollection services, 
-        IConfiguration configuration)
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string connectionStringName = "DefaultConnection")
     {
         services.AddDbContext<AppDbContext>(
-            options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-        
+            options => options.UseNpgsql(
+                configuration.GetConnectionString(connectionStringName)));
+
         return services;
     }
 }

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "expense-tracker.api", "expense-tracker.api\expense-tracker.api.csproj", "{826643B4-7183-48F4-A1F6-05AE62DD8C42}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "expense-tracker.api.Tests", "expense-tracker.api.Tests\expense-tracker.api.Tests.csproj", "{4EE508CF-2E3C-42FC-B60E-19A634EE4385}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{826643B4-7183-48F4-A1F6-05AE62DD8C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{826643B4-7183-48F4-A1F6-05AE62DD8C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{826643B4-7183-48F4-A1F6-05AE62DD8C42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EE508CF-2E3C-42FC-B60E-19A634EE4385}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EE508CF-2E3C-42FC-B60E-19A634EE4385}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EE508CF-2E3C-42FC-B60E-19A634EE4385}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EE508CF-2E3C-42FC-B60E-19A634EE4385}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
