@@ -494,4 +494,262 @@ public class ExpenseServiceTests
             await transaction.RollbackAsync();
         }
     }
+    
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdateExpense_WhenExpenseBelongsToUser()
+    {
+        // Arrange
+        await using var context = TestDatabase.CreateContext();
+        await using var transaction =
+            await context.Database.BeginTransactionAsync();
+
+        var user = new User
+        {
+            Username = "update-user",
+            Email = "update-user@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Update",
+            LastName = "User"
+        };
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        var expense = new Expense
+        {
+            Amount = 100,
+            Description = "Old description",
+            Date = DateTime.UtcNow.AddDays(-1),
+            UserId = user.Id
+        };
+
+        context.Expenses.Add(expense);
+        await context.SaveChangesAsync();
+
+        var dto = new UpdateExpenseDto
+        {
+            Amount = 250,
+            Description = "Updated description",
+            Date = DateTime.UtcNow
+        };
+
+        var expenseService = new ExpenseService(context);
+
+        try
+        {
+            // Act
+            var result = await expenseService.UpdateAsync(expense.Id, dto, user.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expense.Id, result.Id);
+            Assert.Equal(dto.Amount, result.Amount);
+            Assert.Equal(dto.Description, result.Description);
+            Assert.Equal(dto.Date, result.Date);
+            Assert.Equal(user.Id, result.UserId);
+
+            var updatedExpense = await context.Expenses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == expense.Id);
+
+            Assert.NotNull(updatedExpense);
+            Assert.Equal(dto.Amount, updatedExpense.Amount);
+            Assert.Equal(dto.Description, updatedExpense.Description);
+            Assert.Equal(dto.Date, updatedExpense.Date);
+            Assert.Equal(user.Id, updatedExpense.UserId);
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_ShouldReturnNull_WhenExpenseDoesNotExist()
+    {
+        // Arrange
+        await using var context = TestDatabase.CreateContext();
+        await using var transaction =
+            await context.Database.BeginTransactionAsync();
+
+        var user = new User
+        {
+            Username = "missing-update-user",
+            Email = "missing-update@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Missing",
+            LastName = "Update"
+        };
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        var dto = new UpdateExpenseDto
+        {
+            Amount = 250,
+            Description = "Updated expense",
+            Date = DateTime.UtcNow
+        };
+
+        var expenseService = new ExpenseService(context);
+
+        try
+        {
+            // Act
+            var result = await expenseService.UpdateAsync(
+                999999,
+                dto,
+                user.Id);
+
+            // Assert
+            Assert.Null(result);
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_ShouldReturnNull_WhenExpenseBelongsToAnotherUser()
+    {
+        // Arrange
+        await using var context = TestDatabase.CreateContext();
+        await using var transaction =
+            await context.Database.BeginTransactionAsync();
+
+        var owner = new User
+        {
+            Username = "update-owner",
+            Email = "update-owner@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Update",
+            LastName = "Owner"
+        };
+
+        var otherUser = new User
+        {
+            Username = "other-update-user",
+            Email = "other-update@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Other",
+            LastName = "User"
+        };
+
+        context.Users.AddRange(owner, otherUser);
+        await context.SaveChangesAsync();
+
+        var expense = new Expense
+        {
+            Amount = 100,
+            Description = "Original expense",
+            Date = DateTime.UtcNow.AddDays(-1),
+            UserId = owner.Id
+        };
+
+        context.Expenses.Add(expense);
+        await context.SaveChangesAsync();
+
+        var dto = new UpdateExpenseDto
+        {
+            Amount = 999,
+            Description = "Unauthorized update",
+            Date = DateTime.UtcNow
+        };
+
+        var expenseService = new ExpenseService(context);
+
+        try
+        {
+            // Act
+            var result = await expenseService.UpdateAsync(
+                expense.Id,
+                dto,
+                otherUser.Id);
+
+            // Assert
+            Assert.Null(result);
+
+            var unchangedExpense = await context.Expenses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == expense.Id);
+
+            Assert.NotNull(unchangedExpense);
+            Assert.Equal(100, unchangedExpense.Amount);
+            Assert.Equal("Original expense", unchangedExpense.Description);
+            Assert.Equal(expense.Date, unchangedExpense.Date);
+            Assert.Equal(owner.Id, unchangedExpense.UserId);
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowException_WhenDateIsMissing()
+    {
+        // Arrange
+        await using var context = TestDatabase.CreateContext();
+        await using var transaction =
+            await context.Database.BeginTransactionAsync();
+
+        var user = new User
+        {
+            Username = "missing-update-date-user",
+            Email = "missing-update-date@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Missing",
+            LastName = "Date"
+        };
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        var expense = new Expense
+        {
+            Amount = 100,
+            Description = "Original expense",
+            Date = DateTime.UtcNow.AddDays(-1),
+            UserId = user.Id
+        };
+
+        context.Expenses.Add(expense);
+        await context.SaveChangesAsync();
+
+        var dto = new UpdateExpenseDto
+        {
+            Amount = 500,
+            Description = "Should not update",
+            Date = null
+        };
+
+        var expenseService = new ExpenseService(context);
+
+        try
+        {
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => expenseService.UpdateAsync(
+                    expense.Id,
+                    dto,
+                    user.Id));
+
+            Assert.Equal("Date is required.", exception.Message);
+
+            var unchangedExpense = await context.Expenses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == expense.Id);
+
+            Assert.NotNull(unchangedExpense);
+            Assert.Equal(100, unchangedExpense.Amount);
+            Assert.Equal("Original expense", unchangedExpense.Description);
+            Assert.Equal(expense.Date, unchangedExpense.Date);
+            Assert.Equal(user.Id, unchangedExpense.UserId);
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+    }
 }
