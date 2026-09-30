@@ -179,4 +179,150 @@ public class ExpenseServiceTests
             await transaction.RollbackAsync();
         }
     }
+    
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnExpense_WhenExpenseBelongsToUser()
+    {
+        // Arrange
+        await using var context = TestDatabase.CreateContext();
+        await using var transaction =
+            await context.Database.BeginTransactionAsync();
+
+        var user = new User
+        {
+            Username = "get-by-id-user",
+            Email = "get-by-id@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Get",
+            LastName = "Test"
+        };
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+        
+        var expense = new Expense
+        {
+            Amount = 150,
+            Description = "Groceries",
+            Date = DateTime.UtcNow,
+            UserId = user.Id
+        };
+
+        context.Expenses.Add(expense);
+        await context.SaveChangesAsync();
+        
+        var expenseService = new ExpenseService(context);
+
+        try
+        {
+            // Act
+            var result = await expenseService.GetByIdAsync(expense.Id, user.Id);
+        
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expense.Id, result.Id);
+            Assert.Equal(expense.Amount, result.Amount);
+            Assert.Equal(expense.Description, result.Description);
+            Assert.Equal(expense.Date, result.Date);
+            Assert.Equal(user.Id, result.UserId);
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+    }
+    
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnNull_WhenExpenseBelongsToAnotherUser()
+    {
+        // Arrange
+        await using var context = TestDatabase.CreateContext();
+        await using var transaction =
+            await context.Database.BeginTransactionAsync();
+
+        var owner = new User
+        {
+            Username = "expense-owner",
+            Email = "expense-owner@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Expense",
+            LastName = "Owner"
+        };
+
+        var otherUser = new User
+        {
+            Username = "other-user",
+            Email = "other-user@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Other",
+            LastName = "User"
+        };
+
+        context.Users.AddRange(owner, otherUser);
+        await context.SaveChangesAsync();
+        
+        var expense = new Expense
+        {
+            Amount = 200,
+            Description = "Owner's expense",
+            Date = DateTime.UtcNow,
+            UserId = owner.Id
+        };
+
+        context.Expenses.Add(expense);
+        await context.SaveChangesAsync();
+
+        var expenseService = new ExpenseService(context);
+        
+        try
+        {
+            // Act
+            var result = await expenseService.GetByIdAsync(
+                expense.Id,
+                otherUser.Id);
+
+            // Assert
+            Assert.Null(result);
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+    }
+    
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnNull_WhenExpenseDoesNotExist()
+    {
+        // Arrange
+        await using var context = TestDatabase.CreateContext();
+        await using var transaction =
+            await context.Database.BeginTransactionAsync();
+
+        var user = new User
+        {
+            Username = "missing-expense-user",
+            Email = "missing-expense@example.com",
+            PasswordHash = "test-password",
+            FirstName = "Missing",
+            LastName = "Expense"
+        };
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        var expenseService = new ExpenseService(context);
+
+        try
+        {
+            // Act
+            var result = await expenseService.GetByIdAsync(999999, user.Id);
+
+            // Assert
+            Assert.Null(result);
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+    }
 }
