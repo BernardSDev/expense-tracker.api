@@ -9,8 +9,13 @@ public static class CorsExtensions
         {
             options.AddPolicy("Frontend", policy =>
             {
-                // policy.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
-                policy.WithOrigins("http://localhost:3000").AllowAnyHeader();
+                policy
+                    .WithOrigins(
+                        "http://localhost:3000",
+                        "https://trackk-now.vercel.app"
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
             });
         });
 
