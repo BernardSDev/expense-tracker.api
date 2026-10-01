@@ -8,6 +8,7 @@ builder.Services.AddApiConfiguration();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddCorsConfiguration();
 
 var app = builder.Build();
 
@@ -18,6 +19,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("Frontend");
 
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 

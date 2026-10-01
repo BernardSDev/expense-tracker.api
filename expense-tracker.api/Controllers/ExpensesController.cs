@@ -27,6 +27,20 @@ public class ExpensesController(
     }
     
     [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var userId = currentUserService.UserId;
+
+        var result = await expenseService.GetExpensesByUserAsync(userId);
+
+        if (result is null)
+            return this.NotFoundError(ErrorMessages.NotFound);
+
+        return Ok(result);
+    }
+    
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
