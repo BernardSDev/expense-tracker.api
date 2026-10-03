@@ -437,18 +437,20 @@ public class ExpenseServiceTests
     {
         // Arrange
         await using var context = TestDatabase.CreateContext();
-        await using var transaction =
-            await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         var expenseService = new ExpenseService(context);
+        var userId = Guid.NewGuid();
 
         try
         {
             // Act
-            var result = await expenseService.GetExpensesByUserAsync(Guid.NewGuid());
+            var result = await expenseService.GetExpensesByUserAsync(userId);
 
             // Assert
-            Assert.Null(result);
+            Assert.NotNull(result);
+            Assert.Equal(userId, result.UserId);
+            Assert.Empty(result.Expenses);
         }
         finally
         {
