@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IExpenseService, ExpenseService>();
+        services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IAuthService, AuthService>();
 
         services.AddScoped<IUserService, UserService>();
