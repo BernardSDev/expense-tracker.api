@@ -1,8 +1,12 @@
 using expense_tracker.api.Data;
 using expense_tracker.api.DTOs;
+using expense_tracker.api.DTOs.Auth;
 using expense_tracker.api.Exceptions;
 using expense_tracker.api.Models;
 using expense_tracker.api.Security;
+using expense_tracker.api.Security.Password;
+using expense_tracker.api.Security.RefreshTokens;
+using expense_tracker.api.Security.Tokens;
 using Microsoft.EntityFrameworkCore;
 
 namespace expense_tracker.api.Services.Auth;

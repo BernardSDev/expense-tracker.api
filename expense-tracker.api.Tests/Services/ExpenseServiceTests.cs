@@ -1,4 +1,6 @@
 using expense_tracker.api.DTOs;
+using expense_tracker.api.DTOs.Categories;
+using expense_tracker.api.DTOs.Expenses;
 using expense_tracker.api.Models;
 using expense_tracker.api.Services;
 using expense_tracker.api.Tests.Infrastructure;

@@ -1,7 +1,10 @@
 using expense_tracker.api.Constants;
 using expense_tracker.api.DTOs;
+using expense_tracker.api.DTOs.Categories;
+using expense_tracker.api.DTOs.Expenses;
 using expense_tracker.api.Extensions;
 using expense_tracker.api.Security;
+using expense_tracker.api.Security.CurrentUser;
 using expense_tracker.api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

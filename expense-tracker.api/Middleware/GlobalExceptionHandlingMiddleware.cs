@@ -15,9 +15,12 @@ public class GlobalExceptionHandlingMiddleware(
         }
         catch (Exception exception)
         {
-            var status = exception is UnauthorizedException 
-                ? StatusCodes.Status401Unauthorized 
-                : StatusCodes.Status500InternalServerError;
+            var status = exception switch
+            {
+                UnauthorizedException => StatusCodes.Status401Unauthorized,
+                NotFoundException => StatusCodes.Status404NotFound,
+                _ => StatusCodes.Status500InternalServerError
+            };
 
             if (status == StatusCodes.Status500InternalServerError)
             {
@@ -27,8 +30,13 @@ public class GlobalExceptionHandlingMiddleware(
             var errorResponse = new ErrorResponseDto
             {
                 Status = status,
-                Message = status == StatusCodes.Status401Unauthorized ? "Unauthorized" : "Internal server error",
-                Details = status == StatusCodes.Status401Unauthorized ? exception.Message : "An unhandled error occurred."
+                Message = status switch
+                {
+                    StatusCodes.Status401Unauthorized => "Unauthorized",
+                    StatusCodes.Status404NotFound => "Not Found",
+                    _ => "Internal server error"
+                },
+                Details = status == StatusCodes.Status500InternalServerError ? "An unhandled error occurred." : exception.Message
             };
 
             context.Response.StatusCode = errorResponse.Status;

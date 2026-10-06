@@ -1,4 +1,5 @@
 using expense_tracker.api.DTOs;
+using expense_tracker.api.DTOs.Auth;
 using expense_tracker.api.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
 

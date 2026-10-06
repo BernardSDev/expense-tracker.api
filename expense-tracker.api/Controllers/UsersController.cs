@@ -1,5 +1,7 @@
 using expense_tracker.api.DTOs;
+using expense_tracker.api.DTOs.Users;
 using expense_tracker.api.Security;
+using expense_tracker.api.Security.CurrentUser;
 using expense_tracker.api.Services;
 using Microsoft.AspNetCore.Mvc;
 
