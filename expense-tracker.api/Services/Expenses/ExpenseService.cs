@@ -101,10 +101,25 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         {
             return null;
         }
+        
+        string? categoryName = null;
+
+        if (dto.CategoryId.HasValue)
+        {
+            categoryName = await context.Categories.Where(category =>
+                category.Id == dto.CategoryId.Value && 
+                category.UserId == userId)
+                .Select(category => category.Name)
+                .FirstOrDefaultAsync();
+            
+            if (categoryName is null) 
+                throw new NotFoundException("Category not found.");
+        }
 
         expense.Amount = dto.Amount;
         expense.Description = dto.Description;
         expense.Date = dto.Date ?? throw new InvalidOperationException("Date is required.");
+        expense.CategoryId = dto.CategoryId;
         
         await context.SaveChangesAsync();
 
@@ -114,7 +129,9 @@ public class ExpenseService(AppDbContext context) : IExpenseService
             Amount = expense.Amount,
             Description = expense.Description,
             Date = expense.Date,
-            UserId = expense.UserId
+            UserId = expense.UserId,
+            CategoryId = expense.CategoryId,
+            CategoryName = categoryName
         };
     }
 
