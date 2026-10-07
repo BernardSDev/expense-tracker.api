@@ -260,7 +260,7 @@ public class ExpenseServiceTests
         var expenseService = new ExpenseService(context);
         
         // Act
-        var result = await expenseService.GetExpensesByUserAsync(user.Id);
+        var result = await expenseService.GetAllAsync(user.Id);
 
         // Assert
         Assert.NotNull(result);
@@ -298,7 +298,7 @@ public class ExpenseServiceTests
         var userId = Guid.NewGuid();
         
         // Act
-        var result = await expenseService.GetExpensesByUserAsync(userId);
+        var result = await expenseService.GetAllAsync(userId);
 
         // Assert
         Assert.NotNull(result);
@@ -321,7 +321,7 @@ public class ExpenseServiceTests
         var expenseService = new ExpenseService(context);
         
         // Act
-        var result = await expenseService.GetExpensesByUserAsync(user.Id);
+        var result = await expenseService.GetAllAsync(user.Id);
 
         // Assert
         Assert.NotNull(result);
@@ -503,5 +503,79 @@ public class ExpenseServiceTests
         Assert.Equal("Original expense", unchangedExpense.Description);
         Assert.Equal(expense.Date, unchangedExpense.Date);
         Assert.Equal(user.Id, unchangedExpense.UserId);
+    }
+    
+    [Fact]
+    public async Task GetAllAsync_ReturnsCategoryInformation()
+    {
+        await using var testContext = await TestContext.CreateAsync();
+
+        var user = await TestData.CreateUserAsync(
+            testContext.Context,
+            "category-user",
+            "category@example.com"
+        );
+
+        var category = new Category
+        {
+            Name = "Groceries",
+            UserId = user.Id
+        };
+
+        testContext.Context.Categories.Add(category);
+        await testContext.Context.SaveChangesAsync();
+
+        var expense = await TestData.CreateExpenseAsync(
+            testContext.Context,
+            user.Id,
+            250,
+            "Weekly groceries"
+        );
+
+        expense.CategoryId = category.Id;
+        await testContext.Context.SaveChangesAsync();
+
+        var service = new ExpenseService(testContext.Context);
+
+        var result = await service.GetAllAsync(user.Id);
+
+        Assert.Single(result.Expenses);
+
+        var returnedExpense = result.Expenses[0];
+
+        Assert.Equal(expense.Id, returnedExpense.Id);
+        Assert.Equal(category.Id, returnedExpense.CategoryId);
+        Assert.Equal("Groceries", returnedExpense.CategoryName);
+    }
+    
+    [Fact]
+    public async Task GetAllAsync_ReturnsNullCategory_WhenExpenseHasNoCategory()
+    {
+        await using var testContext = await TestContext.CreateAsync();
+
+        var user = await TestData.CreateUserAsync(
+            testContext.Context,
+            "no-category-user",
+            "no-category@example.com"
+        );
+
+        var expense = await TestData.CreateExpenseAsync(
+            testContext.Context,
+            user.Id,
+            100,
+            "Cash expense"
+        );
+
+        var service = new ExpenseService(testContext.Context);
+
+        var result = await service.GetAllAsync(user.Id);
+
+        Assert.Single(result.Expenses);
+
+        var returnedExpense = result.Expenses[0];
+
+        Assert.Equal(expense.Id, returnedExpense.Id);
+        Assert.Null(returnedExpense.CategoryId);
+        Assert.Null(returnedExpense.CategoryName);
     }
 }

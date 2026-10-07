@@ -72,17 +72,20 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         };
     }
     
-    public async Task<UserExpensesResponseDto> GetExpensesByUserAsync(Guid userId)
+    public async Task<UserExpensesResponseDto> GetAllAsync(Guid userId)
     {
         var expenses = await context.Expenses
             .Where(e => e.UserId == userId)
+            .OrderByDescending(e => e.Date)
             .Select(e => new ExpenseResponseDto
             {
                 Id = e.Id,
                 Amount = e.Amount,
                 Description = e.Description,
                 Date = e.Date,
-                UserId = e.UserId
+                UserId = e.UserId,
+                CategoryId = e.CategoryId,
+                CategoryName = e.Category != null ? e.Category.Name : null
             })
             .ToListAsync();
 

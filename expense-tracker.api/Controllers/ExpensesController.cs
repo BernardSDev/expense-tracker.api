@@ -35,7 +35,7 @@ public class ExpensesController(
     {
         var userId = currentUserService.UserId;
 
-        var result = await expenseService.GetExpensesByUserAsync(userId);
+        var result = await expenseService.GetAllAsync(userId);
 
         return Ok(result);
     }

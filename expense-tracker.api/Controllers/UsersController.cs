@@ -22,7 +22,7 @@ public class UsersController(
     {
         var userId = currentUserService.UserId;
         
-        var result = await expenseService.GetExpensesByUserAsync(userId);
+        var result = await expenseService.GetAllAsync(userId);
         
         if (result is null)
         {
