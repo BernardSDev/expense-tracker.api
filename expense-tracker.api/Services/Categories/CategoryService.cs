@@ -1,7 +1,9 @@
+using expense_tracker.api.Constants;
 using expense_tracker.api.Data;
 using expense_tracker.api.DTOs;
 using expense_tracker.api.DTOs.Categories;
 using expense_tracker.api.DTOs.Expenses;
+using expense_tracker.api.Exceptions;
 using expense_tracker.api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,12 +66,24 @@ public class CategoryService(AppDbContext context) : ICategoryService
     public async Task<bool> DeleteAsync(int id, Guid userId)
     {
         var category = await context.Categories
-            .FirstOrDefaultAsync(category =>
-                category.Id == id &&
-                category.UserId == userId);
+            .FirstOrDefaultAsync(c =>
+                c.Id == id &&
+                c.UserId == userId);
 
-        if (category is null)
+        if (category == null)
+        {
             return false;
+        }
+
+        var isInUse = await context.Expenses
+            .AnyAsync(e => e.CategoryId == id);
+
+        if (isInUse)
+        {
+            throw new ConflictException(
+                ErrorMessages.CategoryInUse
+            );
+        }
 
         context.Categories.Remove(category);
 
