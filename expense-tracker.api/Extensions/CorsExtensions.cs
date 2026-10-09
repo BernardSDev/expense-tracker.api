@@ -12,7 +12,7 @@ public static class CorsExtensions
                 policy
                     .WithOrigins(
                         "http://localhost:3000",
-                        "https://sikakwan.vercel.app/"
+                        "https://sikakwan.vercel.app"
                     )
                     .AllowAnyHeader()
                     .AllowAnyMethod();
