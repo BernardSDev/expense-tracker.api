@@ -578,4 +578,94 @@ public class ExpenseServiceTests
         Assert.Null(returnedExpense.CategoryId);
         Assert.Null(returnedExpense.CategoryName);
     }
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsOnlyExpensesInRange_WhenFromAndToAreGiven()
+    {
+        await using var testContext = await TestContext.CreateAsync();
+
+        var user = await TestData.CreateUserAsync(
+            testContext.Context,
+            "range-user",
+            "range@example.com"
+        );
+
+        var from = new DateTimeOffset(2026, 10, 1, 0, 0, 0, TimeSpan.Zero);
+        var to = new DateTimeOffset(2026, 11, 1, 0, 0, 0, TimeSpan.Zero);
+
+        var lastDayOfSeptember = await TestData.CreateExpenseAsync(
+            testContext.Context, user.Id, 10, "September", from.AddMinutes(-1));
+
+        var firstMomentOfOctober = await TestData.CreateExpenseAsync(
+            testContext.Context, user.Id, 20, "October start", from);
+
+        var midOctober = await TestData.CreateExpenseAsync(
+            testContext.Context, user.Id, 30, "October middle", from.AddDays(14));
+
+        var firstMomentOfNovember = await TestData.CreateExpenseAsync(
+            testContext.Context, user.Id, 40, "November", to);
+
+        var service = new ExpenseService(testContext.Context);
+
+        var result = await service.GetAllAsync(user.Id, from, to);
+
+        Assert.Equal(2, result.Expenses.Count);
+        Assert.Contains(result.Expenses, e => e.Id == firstMomentOfOctober.Id);
+        Assert.Contains(result.Expenses, e => e.Id == midOctober.Id);
+        Assert.DoesNotContain(result.Expenses, e => e.Id == lastDayOfSeptember.Id);
+        Assert.DoesNotContain(result.Expenses, e => e.Id == firstMomentOfNovember.Id);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_UsesTheSameMoment_WhenRangeHasATimeZoneOffset()
+    {
+        await using var testContext = await TestContext.CreateAsync();
+
+        var user = await TestData.CreateUserAsync(
+            testContext.Context,
+            "offset-user",
+            "offset@example.com"
+        );
+
+        var expense = await TestData.CreateExpenseAsync(
+            testContext.Context,
+            user.Id,
+            15,
+            "Late night snack",
+            new DateTimeOffset(2026, 9, 30, 23, 30, 0, TimeSpan.Zero));
+
+        var from = new DateTimeOffset(2026, 10, 1, 0, 0, 0, TimeSpan.FromHours(1));
+        var to = new DateTimeOffset(2026, 11, 1, 0, 0, 0, TimeSpan.FromHours(1));
+
+        var service = new ExpenseService(testContext.Context);
+
+        var result = await service.GetAllAsync(user.Id, from, to);
+
+        Assert.Single(result.Expenses);
+        Assert.Equal(expense.Id, result.Expenses[0].Id);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsAllExpenses_WhenNoRangeIsGiven()
+    {
+        await using var testContext = await TestContext.CreateAsync();
+
+        var user = await TestData.CreateUserAsync(
+            testContext.Context,
+            "no-range-user",
+            "no-range@example.com"
+        );
+
+        await TestData.CreateExpenseAsync(
+            testContext.Context, user.Id, 10, "Old", DateTimeOffset.UtcNow.AddYears(-1));
+
+        await TestData.CreateExpenseAsync(
+            testContext.Context, user.Id, 20, "Recent", DateTimeOffset.UtcNow);
+
+        var service = new ExpenseService(testContext.Context);
+
+        var result = await service.GetAllAsync(user.Id);
+
+        Assert.Equal(2, result.Expenses.Count);
+    }
 }

@@ -31,11 +31,13 @@ public class ExpensesController(
     
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        [FromQuery] DateTimeOffset? from,
+        [FromQuery] DateTimeOffset? to)
     {
         var userId = currentUserService.UserId;
 
-        var result = await expenseService.GetAllAsync(userId);
+        var result = await expenseService.GetAllAsync(userId, from, to);
 
         return Ok(result);
     }

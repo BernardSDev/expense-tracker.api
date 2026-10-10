@@ -8,7 +8,10 @@ public interface IExpenseService
 {
     Task<ExpenseResponseDto> CreateAsync(CreateExpenseDto dto, Guid userId); 
     Task<ExpenseResponseDto?> GetByIdAsync(int id, Guid userId);
-    Task<UserExpensesResponseDto> GetAllAsync(Guid userId);
+    Task<UserExpensesResponseDto> GetAllAsync(
+        Guid userId,
+        DateTimeOffset? from = null,
+        DateTimeOffset? to = null);
     
     Task<ExpenseResponseDto?> UpdateAsync(int id, UpdateExpenseDto dto, Guid userId);
     

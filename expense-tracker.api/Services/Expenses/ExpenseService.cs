@@ -72,10 +72,26 @@ public class ExpenseService(AppDbContext context) : IExpenseService
         };
     }
     
-    public async Task<UserExpensesResponseDto> GetAllAsync(Guid userId)
+    public async Task<UserExpensesResponseDto> GetAllAsync(
+        Guid userId,
+        DateTimeOffset? from = null,
+        DateTimeOffset? to = null)
     {
-        var expenses = await context.Expenses
-            .Where(e => e.UserId == userId)
+        var query = context.Expenses.Where(e => e.UserId == userId);
+
+        if (from.HasValue)
+        {
+            var fromUtc = from.Value.ToUniversalTime();
+            query = query.Where(e => e.Date >= fromUtc);
+        }
+
+        if (to.HasValue)
+        {
+            var toUtc = to.Value.ToUniversalTime();
+            query = query.Where(e => e.Date < toUtc);
+        }
+
+        var expenses = await query
             .OrderByDescending(e => e.Date)
             .Select(e => new ExpenseResponseDto
             {
